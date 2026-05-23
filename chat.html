@@ -1,0 +1,795 @@
+
+<!DOCTYPE html>  <html>  
+<head>  
+    <meta charset="UTF-8">  
+    <title>Live Chat</title>  
+    <link rel="preconnect" href="https://fonts.googleapis.com">  
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>  
+    <link href="https://fonts.googleapis.com/css2?family=Lateef:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">  
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" />  <style>  
+
+    body {  
+        background-color: #030303;  
+        margin: 0;  
+        color: white;  
+        font-family: "Lateef", serif;  
+        overflow-x: hidden;  
+    }  
+
+    #header {  
+        width: 100%;  
+        height: 170px;  
+        background: white;  
+        color: black;  
+        position: fixed;  
+        top: 0;  
+        left: 0;  
+        right: 0;  
+        display: flex;  
+        justify-content: center;  
+        align-items: center;  
+        font-size: 70px;  
+        z-index: 999;  
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);  
+    }  
+
+    #userName {  
+        margin-right: 20px;  
+    }  
+
+    #chatBox {  
+        margin-top: 190px;  
+        padding: 20px;  
+        padding-bottom: 300px;  
+        display: flex;  
+        flex-direction: column;  
+    }  
+
+    .msgGroup {  
+        display: flex;  
+        flex-direction: column;  
+        margin-bottom: 25px;  
+    }  
+
+    .msgGroup.me {  
+        align-items: flex-end;  
+    }  
+
+    .msgGroup.other {  
+        align-items: flex-start;  
+    }  
+
+    .msg {  
+        max-width: 75%;  
+        padding: 25px;  
+        margin-top: 8px;  
+        border-radius: 35px;  
+        font-size: 55px;  
+        position: relative;  
+        word-wrap: break-word;  
+        animation: show 0.3s ease;  
+        user-select: none;  
+    }  
+
+    .myMsg {  
+        background: white;  
+        color: black;  
+        text-align: right;  
+        border-bottom-right-radius: 5px;  
+    }  
+
+    .otherMsg {  
+        background: #1e1e1e;  
+        color: white;  
+        text-align: left;  
+        border-bottom-left-radius: 5px;  
+    }  
+
+    .adminMsg {  
+        background: rgba(0, 191, 255, 0.25);  
+        color: white;  
+        border: 3px solid white;  
+    }  
+
+    .name {  
+        display: block;  
+        font-size: 45px;  
+        margin-bottom: 15px;  
+        color: #00bfff;  
+        font-weight: bold;  
+    }  
+
+    .mainText {  
+        line-height: 1.4;  
+    }  
+
+    .delBtn {  
+        background: red;  
+        color: white;  
+        border: none;  
+        border-radius: 20px;  
+        padding: 5px 15px;  
+        font-size: 35px;  
+        margin-top: 20px;  
+        font-family: "Lateef", serif;  
+    }  
+
+    .replyThread {  
+        margin-top: 25px;  
+        margin-right: 60px;  
+        padding-right: 25px;  
+        border-right: 6px solid #00bfff;  
+    }  
+
+    .replyBubble {  
+        margin-top: 20px;  
+        background: rgba(255, 255, 255, 0.08);  
+        padding: 18px;  
+        border-radius: 25px;  
+        font-size: 40px;  
+    }  
+
+    .replyBubble.adminReply {  
+        background: rgba(0, 191, 255, 0.25);  
+        border: 2px solid #00bfff;  
+    }  
+
+    .replyName {  
+        color: #00bfff;  
+        display: block;  
+        margin-bottom: 10px;  
+        font-size: 35px;  
+    }  
+
+    #controls {  
+        width: 100%;  
+        position: fixed;  
+        bottom: 0;  
+        left: 0;  
+        right: 0;  
+        background: #111;  
+        padding: 20px;  
+        display: flex;  
+        gap: 20px;  
+        box-sizing: border-box;  
+        align-items: center;  
+    }  
+
+    #msgInput {  
+        flex: 1;  
+        height: 120px;  
+        border: none;  
+        border-radius: 40px;  
+        font-size: 55px;  
+        padding-right: 30px;  
+        font-family: "Lateef", serif;  
+        outline: none;  
+    }  
+
+    .sendBtn, .micBtn {  
+        width: 220px;  
+        border: none;  
+        border-radius: 40px;  
+        background: white;  
+        color: black;  
+        font-size: 55px;  
+        font-family: "Lateef", serif;  
+        cursor: pointer;  
+        display: flex;  
+        align-items: center;  
+        justify-content: center;  
+        height: 120px;  
+    }  
+
+    .micBtn.recording {  
+        background: red;  
+        color: white;  
+    }  
+
+    /* ===== الرسالة الصوتية ===== */  
+
+    .voiceMessage{  
+        width:100%;  
+        padding:20px;  
+        border-radius:35px;  
+        box-sizing:border-box;  
+        margin-top:10px;  
+    }  
+
+    .myVoice{  
+        background:white;  
+        color:black;  
+        border-bottom-right-radius:5px;  
+    }  
+
+    .otherVoice{  
+        background:#1e1e1e;  
+        color:white;  
+        border-bottom-left-radius:5px;  
+    }  
+
+    .voiceRow{  
+        display:flex;  
+        align-items:center;  
+        gap:20px;  
+    }  
+
+    .playBtn{  
+        width:95px;  
+        height:95px;  
+        border:none;  
+        border-radius:50%;  
+        background:#00bfff;  
+        color:white;  
+        font-size:38px;  
+        cursor:pointer;  
+        flex-shrink:0;  
+    }  
+
+    .waveBox{  
+        flex:1;  
+        height:70px;  
+        display:flex;  
+        align-items:center;  
+        gap:5px;  
+        overflow:hidden;  
+    }  
+
+    .bar{  
+        width:8px;  
+        background:#00bfff;  
+        border-radius:20px;  
+        opacity:0.5;  
+    }  
+
+    .bar:nth-child(1){height:20px;}  
+    .bar:nth-child(2){height:45px;}  
+    .bar:nth-child(3){height:30px;}  
+    .bar:nth-child(4){height:60px;}  
+    .bar:nth-child(5){height:40px;}  
+    .bar:nth-child(6){height:70px;}  
+    .bar:nth-child(7){height:28px;}  
+    .bar:nth-child(8){height:58px;}  
+    .bar:nth-child(9){height:36px;}  
+    .bar:nth-child(10){height:65px;}  
+    .bar:nth-child(11){height:32px;}  
+    .bar:nth-child(12){height:55px;}  
+    .bar:nth-child(13){height:40px;}  
+    .bar:nth-child(14){height:68px;}  
+    .bar:nth-child(15){height:25px;}  
+    .bar:nth-child(16){height:60px;}  
+    .bar:nth-child(17){height:35px;}  
+    .bar:nth-child(18){height:72px;}  
+
+    .waveBox.playing .bar{  
+        animation:wave 0.7s infinite ease-in-out;  
+    }  
+
+    @keyframes wave{  
+        0%{  
+            transform:scaleY(0.5);  
+            opacity:0.4;  
+        }  
+
+        50%{  
+            transform:scaleY(1.4);  
+            opacity:1;  
+        }  
+
+        100%{  
+            transform:scaleY(0.5);  
+            opacity:0.4;  
+        }  
+    }  
+
+    .voiceBottom{  
+        display:flex;  
+        justify-content:space-between;  
+        align-items:center;  
+        margin-top:10px;  
+    }  
+
+    .voiceTime{  
+        font-size:35px;  
+        color:#aaa;  
+    }  
+
+    .hiddenAudio{  
+        display:none;  
+    }  
+
+    #replyPreview {  
+        position: fixed;  
+        bottom: 170px;  
+        right: 20px;  
+        left: 20px;  
+        background: #1a1a1a;  
+        border-right: 10px solid #00bfff;  
+        padding: 15px 25px;  
+        border-radius: 25px;  
+        display: none;  
+        z-index: 999;  
+    }  
+
+    #replyPreviewName {  
+        color: #00bfff;  
+        font-size: 40px;  
+    }  
+
+    #replyPreviewText {  
+        font-size: 35px;  
+    }  
+
+    #cancelReply {  
+        position: absolute;  
+        right: 20px;  
+        top: 15px;  
+        font-size: 40px;  
+        color: red;  
+        cursor: pointer;  
+    }  
+
+    @keyframes show {  
+        from { opacity: 0; transform: translateY(20px); }  
+        to { opacity: 1; transform: translateY(0); }  
+    }  
+
+    .material-symbols-rounded{  
+        font-size:70px;  
+        width:100%;  
+        height:100%;  
+        display:flex;  
+        align-items:center;  
+        justify-content:center;  
+        font-variation-settings:  
+        'FILL' 1,  
+        'wght' 400,  
+        'GRAD' 0,  
+        'opsz' 48;  
+    }  
+</style>
+
+</head>  <body>  <div id="header">  
+    👤 &nbsp;&nbsp;  
+    <span id="userName">User</span>  
+</div>  
+
+<div id="chatBox"></div>  
+
+<div id="replyPreview">  
+    <div id="cancelReply" onclick="cancelReply()">✖</div>  
+    <div id="replyPreviewName"></div>  
+    <div id="replyPreviewText"></div>  
+</div>  
+
+<div id="controls">  
+    <button id="micButton" class="micBtn" onclick="toggleRecording()"><span class="material-symbols-rounded">mic</span></button>  
+    <input id="msgInput" placeholder="      اكتب سؤالك... ">  
+    <button class="sendBtn" onclick="sendMsg()">إرسال</button>  
+</div>
+
+<script type="module">  
+  
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";  
+  
+import {  
+    getFirestore,  
+    collection,  
+    addDoc,  
+    onSnapshot,  
+    query,  
+    orderBy,  
+    deleteDoc,  
+    doc,  
+    getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";  
+  
+const firebaseConfig = {  
+    apiKey: "YOUR_API_KEY",  
+    authDomain: "chat-82b87.firebaseapp.com",  
+    projectId: "chat-82b87",  
+    storageBucket: "chat-82b87.firebasestorage.app",  
+    messagingSenderId: "934528193582",  
+    appId: "1:934528193582:web:7bbfbbacf73a758bccfbbf"  
+};  
+  
+const app = initializeApp(firebaseConfig);  
+const db = getFirestore(app);  
+  
+const name = localStorage.getItem("userName") || "Unknown";  
+const userId = localStorage.getItem("userId");  
+// 🚫 التحقق من الحظر
+
+async function checkBan(){
+
+    const banRef = doc(db, "bannedUsers", name);
+
+    const banSnap = await getDoc(banRef);
+
+    if(banSnap.exists()){
+
+        alert("تم حظرك من الشات");
+
+        document.body.innerHTML = `
+            <div style="
+                color:white;
+                display:flex;
+                justify-content:center;
+                align-items:center;
+                height:100vh;
+                font-size:60px;
+                font-family:Lateef;
+                background:black;
+            ">
+                🚫 انت محظور
+            </div>
+        `;
+
+        throw new Error("banned");
+    }
+}
+
+checkBan();
+  
+document.getElementById("userName").textContent = name;  
+  
+let replyData = null;  
+  
+let mediaRecorder;  
+let audioChunks = [];  
+let isRecording = false;  
+  
+// ===== صوت الإشعار =====  
+const notifSound = new Audio("not.wav");  
+  
+// ===== تتبع الرسائل الصوتية المعروفة =====  
+const knownVoiceIds = new Set();  
+let isFirstLoad = true;  
+  
+const micButton = document.getElementById("micButton");  
+  
+async function toggleRecording() {  
+  
+    if (!isRecording) {  
+  
+        try {  
+  
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });  
+  
+            mediaRecorder = new MediaRecorder(stream);  
+  
+            audioChunks = [];  
+  
+            mediaRecorder.ondataavailable = (e) => {  
+                audioChunks.push(e.data);  
+            };  
+  
+            mediaRecorder.onstop = async () => {  
+  
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });  
+  
+                const reader = new FileReader();  
+  
+                reader.readAsDataURL(audioBlob);  
+  
+                reader.onloadend = async () => {  
+  
+                    const base64Audio = reader.result;  
+  
+                    await addDoc(collection(db, "messages"), {  
+                        name: name,  
+                        userId: userId,  
+                        text: "",  
+                        audioBase64: base64Audio,  
+                        time: Date.now(),  
+                        reply: replyData ? {  
+                            name: replyData.name,  
+                            text: replyData.text  
+                        } : null  
+                    });  
+  
+                    cancelReply();  
+  
+                    stream.getTracks().forEach(track => track.stop());  
+                };  
+            };  
+  
+            mediaRecorder.start();  
+  
+            isRecording = true;  
+  
+            micButton.textContent = "إيقاف";  
+  
+            micButton.classList.add("recording");  
+  
+            document.getElementById("msgInput").disabled = true;  
+  
+        } catch (err) {  
+  
+            alert("لا يمكن الوصول للميكروفون: " + err.message);  
+  
+        }  
+  
+    } else {  
+  
+        mediaRecorder.stop();  
+  
+        isRecording = false;  
+  
+        micButton.innerHTML = `<span class="material-symbols-rounded">mic</span>`;  
+  
+        micButton.classList.remove("recording");  
+  
+        document.getElementById("msgInput").disabled = false;  
+    }  
+}  
+  
+window.toggleRecording = toggleRecording;  
+  
+window.sendMsg = async function () {  
+  
+    const input = document.getElementById("msgInput");  
+  
+    if (input.value.trim() === "") return;  
+  
+    await addDoc(collection(db, "messages"), {  
+        name: name,  
+        userId: userId,  
+        text: input.value,  
+        audioBase64: null,  
+        time: Date.now(),  
+        reply: replyData ? {  
+            name: replyData.name,  
+            text: replyData.text  
+        } : null  
+    });  
+  
+    input.value = "";  
+  
+    cancelReply();  
+};  
+  
+window.deleteMsg = async function (id) {  
+    await deleteDoc(doc(db, "messages", id));  
+};  
+  
+window.setReply = function (name, text) {  
+  
+    replyData = { name, text };  
+  
+    document.getElementById("replyPreview").style.display = "block";  
+  
+    document.getElementById("replyPreviewName").innerText = "Reply to " + name;  
+  
+    document.getElementById("replyPreviewText").innerText = text;  
+};  
+  
+window.cancelReply = function () {  
+  
+    replyData = null;  
+  
+    document.getElementById("replyPreview").style.display = "none";  
+};  
+  
+window.toggleVoice = function(btn){  
+  
+    const voice = btn.closest(".voiceMessage");  
+  
+    const audio = voice.querySelector("audio");  
+  
+    const wave = voice.querySelector(".waveBox");  
+  
+    const icon = btn.querySelector("span");  
+  
+    document.querySelectorAll("audio").forEach(a=>{  
+        if(a !== audio){  
+            a.pause();  
+        }  
+    });  
+  
+    document.querySelectorAll(".waveBox").forEach(w=>{  
+        if(w !== wave){  
+            w.classList.remove("playing");  
+        }  
+    });  
+  
+    document.querySelectorAll(".playBtn span").forEach(i=>{  
+        if(i !== icon){  
+            i.innerHTML = "▶";  
+        }  
+    });  
+  
+    if(audio.paused){  
+  
+        audio.play();  
+  
+        icon.innerHTML = "❚❚";  
+  
+        wave.classList.add("playing");  
+  
+    }else{  
+  
+        audio.pause();  
+  
+        icon.innerHTML = "▶";  
+  
+        wave.classList.remove("playing");  
+  
+    }  
+  
+    audio.onended = ()=>{  
+  
+        icon.innerHTML = "▶";  
+  
+        wave.classList.remove("playing");  
+  
+    };  
+};  
+  
+const q = query(collection(db, "messages"), orderBy("time"));  
+  
+onSnapshot(q, (snapshot) => {  
+  
+    const box = document.getElementById("chatBox");  
+  
+    box.innerHTML = "";  
+  
+    const messages = [];  
+  
+    snapshot.forEach(docSnap => {  
+        messages.push({ id: docSnap.id, ...docSnap.data() });  
+    });  
+  
+    // ===== تشغيل صوت الإشعار عند وصول رسالة صوتية جديدة من شخص آخر =====  
+    messages.forEach(data => {  
+        if (  
+            data.audioBase64 &&           // رسالة صوتية  
+            data.userId !== userId &&      // مش من نفس المستخدم  
+            !knownVoiceIds.has(data.id)   // جديدة ومش معروفة  
+        ) {  
+            knownVoiceIds.add(data.id);  
+  
+            // لا تشغل الصوت في التحميل الأول  
+            if (!isFirstLoad) {  
+                notifSound.currentTime = 0;  
+                notifSound.play().catch(() => {});  
+            }  
+        } else if (data.audioBase64) {  
+            // سجّل الرسائل القديمة بدون تشغيل صوت  
+            knownVoiceIds.add(data.id);  
+        }  
+    });  
+  
+    isFirstLoad = false;  
+  
+    messages.forEach(data => {  
+  
+        if (data.reply) return;  
+  
+        const isMe = data.userId === userId;  
+  
+        const isAdmin = data.name === "الاشراف";  
+  
+        const wrapper = document.createElement("div");  
+  
+        wrapper.className = `msgGroup ${isMe ? 'me' : 'other'}`;  
+  
+        const msg = document.createElement("div");  
+  
+        msg.className = `msg ${isMe ? 'myMsg' : 'otherMsg'} ${isAdmin ? 'adminMsg' : ''}`;  
+  
+        const replies = messages.filter(m =>  
+            m.reply &&  
+            m.reply.text === data.text &&  
+            m.reply.name === data.name  
+        );  
+  
+        let repliesHTML = "";  
+  
+        replies.forEach(reply => {  
+  
+            const adminReply = reply.name === "الاشراف";  
+  
+            repliesHTML += `  
+            <div class="replyThread">  
+                <div class="replyBubble ${adminReply ? 'adminReply' : ''}">  
+                    <span class="replyName" style="${adminReply ? 'color:white;' : ''}">  
+                        ${reply.name}  
+                    </span>  
+  
+                    ${reply.audioBase64  
+                        ? `<audio class="audioPlayer" controls src="${reply.audioBase64}"></audio>`  
+                        : reply.text  
+                    }  
+  
+                </div>  
+            </div>`;  
+        });  
+  
+        let messageContent = '';  
+  
+        if (data.audioBase64) {  
+  
+            messageContent = `  
+  
+            <div class="voiceMessage ${isMe ? 'myVoice' : 'otherVoice'}">  
+  
+                <div class="voiceRow">  
+  
+                    <button class="playBtn" onclick="toggleVoice(this)">  
+                        <span>▶</span>  
+                    </button>  
+  
+                    <div class="waveBox">  
+                        ${'<div class="bar"></div>'.repeat(18)}  
+                    </div>  
+  
+                </div>  
+  
+                <div class="voiceBottom">  
+  
+                    <div class="voiceTime">  
+                        <span class="currentTime">0:00</span>  
+                    </div>  
+  
+                </div>  
+  
+                <audio class="hiddenAudio" src="${data.audioBase64}"></audio>  
+  
+            </div>  
+  
+            `;  
+  
+        } else {  
+  
+            messageContent = `<div class="mainText">${data.text}</div>`;  
+        }  
+  
+        msg.innerHTML = `  
+            <span class="name">${data.name}</span>  
+            ${messageContent}  
+            ${repliesHTML}  
+            ${isMe ? `<br><button class="delBtn" onclick="deleteMsg('${data.id}')">حذف</button>` : ""}  
+        `;  
+  
+        msg.addEventListener("contextmenu", (e) => {  
+  
+            e.preventDefault();  
+  
+            setReply(data.name, data.text || "[رسالة صوتية]");  
+        });  
+  
+        wrapper.appendChild(msg);  
+  
+        box.appendChild(wrapper);  
+  
+        const audio = msg.querySelector("audio");  
+  
+        const timeText = msg.querySelector(".currentTime");  
+  
+        if(audio && timeText){  
+  
+            audio.addEventListener("timeupdate",()=>{  
+  
+                const mins = Math.floor(audio.currentTime / 60);  
+  
+                let secs = Math.floor(audio.currentTime % 60);  
+  
+                if(secs < 10){  
+                    secs = "0" + secs;  
+                }  
+  
+                timeText.textContent = mins + ":" + secs;  
+  
+            });  
+  
+        }  
+  
+    });  
+  
+    window.scrollTo(0, document.body.scrollHeight);  
+  
+});  
+  
+</script>  </body>  
+</html>  

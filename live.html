@@ -1,0 +1,305 @@
+<html>
+
+<head>
+
+<link rel="stylesheet" href="style.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Lateef:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="particles">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<div class="box">  
+
+    <img src="logow.png" width="300px" id="gg">
+
+    <div class="box4">  
+
+        <button id="kk">
+            <img src="more.png" width="100px">
+        </button>
+
+    </div>
+
+    <div class="box2">  
+        أ/حمدي دراز
+    </div>
+
+</div>
+
+<div class="ss" align="right">
+
+    <img src="none.png" id="closeSS">
+
+    <div id="mainPage">
+
+        <div class="ssTitle">
+
+            <span class="material-icons">dashboard</span>
+
+            صفحاتنا
+
+        </div>
+
+        <hr>
+
+        <button class="menuBtn">يوتيوب</button>
+        <button class="menuBtn">انستجرام</button>
+        <button class="menuBtn">جروباتنا</button>
+        <button class="menuBtn">المنصة</button>
+
+        <button class="menuBtn" id="openSettings">الإعدادات</button>
+
+    </div>
+
+    <div id="settingsPage" style="display:none;">
+
+        <div class="ssTitle">
+
+            <span class="material-icons">settings</span>
+
+            الإعدادات
+
+        </div>
+
+        <hr>
+
+        <button id="backBtn">رجوع</button>
+
+    </div>
+
+</div>
+
+<br><br>
+
+<img src="logob.png" width="100%">
+
+<div id="container" class="dynamicButtons"></div>
+
+<center>ضياء عبدالهادي انشأ هذه الصفحة</center>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+getFirestore,
+collection,
+getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+const firebaseConfig = {
+
+apiKey: "AIzaSyDVFjoFTEyuqk5pc9YbkraCNKqV2c8GXUc",
+
+authDomain: "diaa-b5c1c.firebaseapp.com",
+
+projectId: "diaa-b5c1c",
+
+storageBucket: "diaa-b5c1c.firebasestorage.app",
+
+messagingSenderId: "313451144294",
+
+appId: "1:313451144294:web:900a47b3bb9936fc2df9a7"
+
+};
+
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+const container = document.getElementById("container");
+
+
+// تحميل البثوث
+async function loadLives(){
+
+container.innerHTML = "";
+
+const liveSnap = await getDocs(collection(db,"lives"));
+
+liveSnap.forEach(item => {
+
+const data = item.data();
+
+if(!data.name || !data.link) return;
+
+container.innerHTML += `
+
+<div class="card">
+
+<img src="${data.image}" width="100%">
+
+<h2 class="liveTitle">🎥 بث : ${data.name}</h2>
+
+<a href="${data.link}" target="_blank">
+
+<button>
+
+دخول البث
+
+</button>
+
+</a>
+
+</div>
+
+`;
+
+});
+
+}
+
+
+loadLives();
+
+
+// menu
+let ss = document.querySelector(".ss");
+
+document.getElementById("kk").onclick = () => {
+
+ss.style.right = "0";
+
+ss.style.visibility = "visible";
+
+ss.style.opacity = "1";
+
+};
+
+
+document.getElementById("closeSS").onclick = () => {
+
+ss.style.right = "-1000px";
+
+ss.style.visibility = "hidden";
+
+ss.style.opacity = "0";
+
+};
+
+
+// settings
+document.getElementById("openSettings").onclick = function(){
+
+document.getElementById("mainPage").style.display = "none";
+
+document.getElementById("settingsPage").style.display = "block";
+
+};
+
+
+document.getElementById("backBtn").onclick = function(){
+
+document.getElementById("settingsPage").style.display = "none";
+
+document.getElementById("mainPage").style.display = "block";
+
+};
+
+</script>
+
+
+<script>
+
+// وقت بداية المشاهدة
+let lessonStartTime = Date.now();
+
+
+// حفظ الحضور
+function saveAttendance(liveTitle){
+
+    const studentName =
+        localStorage.getItem("channelUserName") ||
+        localStorage.getItem("studentName") ||
+        localStorage.getItem("username") ||
+        localStorage.getItem("name") ||
+        localStorage.getItem("userName");
+
+    if(!studentName) return;
+
+    let spentTime =
+        Math.floor((Date.now() - lessonStartTime) / 60000);
+
+    // أقل مدة دقيقة
+    if(spentTime < 1){
+        spentTime = 1;
+    }
+
+    let attendance =
+        JSON.parse(localStorage.getItem("attendanceData") || "{}");
+
+    if(!attendance[studentName]){
+        attendance[studentName] = [];
+    }
+
+    // منع التكرار
+    const alreadyExists =
+        attendance[studentName].some(
+            lesson => lesson.name === liveTitle
+        );
+
+    if(!alreadyExists){
+
+        attendance[studentName].push({
+
+            name: liveTitle,
+
+            time: spentTime + " دقيقة"
+
+        });
+
+    }
+
+    localStorage.setItem(
+        "attendanceData",
+        JSON.stringify(attendance)
+    );
+
+}
+
+
+// التقاط الضغط على البث
+document.addEventListener("click", function(e){
+
+    const btn = e.target.closest("a,button");
+
+    if(!btn) return;
+
+    const card =
+        btn.closest(".card");
+
+    if(!card) return;
+
+    const titleElement =
+        card.querySelector(".liveTitle");
+
+    let liveTitle = "بث مباشر";
+
+    if(titleElement){
+        liveTitle =
+            titleElement.innerText.trim();
+    }
+
+    saveAttendance(liveTitle);
+
+});
+
+</script>
+
+</body>
+
+</html>
